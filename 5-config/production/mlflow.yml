@@ -1,0 +1,23 @@
+mlflow:
+  server:
+    host: "0.0.0.0"
+    port: 5000
+    
+  database:
+    host: "mlflow-postgres"
+    port: 5432
+    database: "mlflow"
+    username: "mlflow"
+    password: "${vault:secret/mlflow/db_password}"  # From Vault
+    
+  artifacts:
+    backend: "s3"
+    s3:
+      endpoint_url: "https://s3.amazonaws.com"  # Real S3 in production
+      bucket: "company-mlflow-prod"
+      access_key: "${vault:secret/aws/s3_access_key}"
+      secret_key: "${vault:secret/aws/s3_secret_key}"
+      region: "us-east-1"
+      
+  tracking:
+    uri: "postgresql://mlflow:${vault:secret/mlflow/db_password}@mlflow-postgres:5432/mlflow"

@@ -1,0 +1,31 @@
+airflow:
+  webserver:
+    port: 8088
+    host: "0.0.0.0"
+    
+  scheduler:
+    dag_dir_list_interval: 5
+    
+  database:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "airflow"
+    
+  connections:
+    kafka: "kafka://kafka1:9092,kafka2:9092,kafka3:9092"
+    postgres: "postgres://datauser:datapass@postgres:5432/datawarehouse"
+    spark: "spark://spark-master:7077"
+    mlflow: "http://mlflow:5000"
+    
+  executor: "LocalExecutor"
+  load_examples: false
+  
+  auth:
+    backend: "airflow.api.auth.backend.basic_auth"
+    
+  admin:
+    username: "admin"
+    password: "admin"
+    email: "admin@dev.local"

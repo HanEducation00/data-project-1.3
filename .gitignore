@@ -1,0 +1,84 @@
+# Zone.Identifier dosyalarını ignore et
+*.Zone.Identifier
+
+# __pycache__ klasörlerini ignore et  
+**/__pycache__/
+
+# Log dosyalarını ignore et
+**/logs/
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+
+# Data files (büyük dosyalar)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Docker volumes ve temporary data
+**/workspace/
+**/data/kafka*/
+**/data/connect/
+**/checkpoints/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# MLflow artifacts
+mlruns/
+artifacts/
+models/
+
+# Airflow
+**/airflow/logs/
+**/airflow/plugins/__pycache__/
+**/airflow/dags/__pycache__/
+
+# Spark
+**/spark-warehouse/
+derby.log
+metastore_db/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
+
+# Compiled files
+*.class
+*.jar
+*.war

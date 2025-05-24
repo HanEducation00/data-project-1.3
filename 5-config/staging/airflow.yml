@@ -1,0 +1,31 @@
+airflow:
+  webserver:
+    port: 8088
+    host: "0.0.0.0"
+    
+  scheduler:
+    dag_dir_list_interval: 10
+    
+  database:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "${AIRFLOW_DB_PASSWORD}"  # From .env
+    
+  connections:
+    kafka: "kafka://kafka1:9092,kafka2:9092,kafka3:9092"
+    postgres: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/datawarehouse"
+    spark: "spark://spark-master:7077"
+    mlflow: "http://mlflow:5000"
+    
+  executor: "LocalExecutor"
+  load_examples: false
+  
+  auth:
+    backend: "airflow.api.auth.backend.basic_auth"
+    
+  admin:
+    username: "admin"
+    password: "${AIRFLOW_ADMIN_PASSWORD}"  # From .env
+    email: "admin@staging.company.com"

@@ -1,0 +1,104 @@
+# Master Docker Compose - Data Platform 1.2
+# Environment-Aware Orchestration
+# Usage: ENVIRONMENT=development docker-compose up
+
+version: '3.8'
+
+# Include all service compositions
+include:
+  - path: 6-infrastructure/docker/5-postgresql/docker-compose.yml
+    env_file: .env.${ENVIRONMENT:-development}
+  - path: 6-infrastructure/docker/1-kafka/docker-compose.yml  
+    env_file: .env.${ENVIRONMENT:-development}
+  - path: 6-infrastructure/docker/2-spark/docker-compose.yml
+    env_file: .env.${ENVIRONMENT:-development}
+  - path: 6-infrastructure/docker/4-mlflow/docker-compose.yml
+    env_file: .env.${ENVIRONMENT:-development}
+  - path: 6-infrastructure/docker/3-airflow/docker-compose.yml
+    env_file: .env.${ENVIRONMENT:-development}
+
+# Global network setup
+networks:
+  data-platform-dev:
+    name: data-platform-dev
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
+    labels:
+      environment: "development"
+      project: "data-platform-1.2"
+      
+  data-platform-staging:
+    name: data-platform-staging
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.31.0.0/16
+          gateway: 172.31.0.1
+    labels:
+      environment: "staging"
+      project: "data-platform-1.2"
+      
+  data-platform-production:
+    name: data-platform-production
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16
+          gateway: 172.32.0.1
+    labels:
+      environment: "production"
+      project: "data-platform-1.2"
+
+# Global volumes for cross-service sharing
+volumes:
+  # Source code sharing
+  shared-workspace:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./2-src
+      
+  shared-workflows:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./3-workflows
+      
+  # Configuration sharing
+  shared-configs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./5-config
+      
+  # Data sharing
+  shared-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./models
+      
+  shared-data-processed:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/processed
+      
+  # Logging
+  shared-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs

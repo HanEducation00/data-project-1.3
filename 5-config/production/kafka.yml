@@ -1,0 +1,36 @@
+kafka:
+  cluster_id: "PrdDXANVLQoKECKCwoSn9mA"
+  nodes:
+    kafka1:
+      node_id: 1
+      ports:
+        internal: 9092
+        external: 9191
+        controller: 9193
+      ip_address: "172.32.10.11"
+    kafka2:
+      node_id: 2
+      ports:
+        internal: 9092
+        external: 9292
+        controller: 9293
+      ip_address: "172.32.10.12"
+    kafka3:
+      node_id: 3
+      ports:
+        internal: 9092
+        external: 9392
+        controller: 9393
+      ip_address: "172.32.10.13"
+  
+  connect:
+    port: 8084
+    group_id: "prod-connect-cluster"
+    ip_address: "172.32.10.14"
+    
+  topics:
+    config_storage: "prod-connect-configs"
+    offset_storage: "prod-connect-offsets"
+    status_storage: "prod-connect-status"
+    
+  bootstrap_servers: "kafka1:9092,kafka2:9092,kafka3:9092"

@@ -1,0 +1,24 @@
+vault:
+  url: "https://vault.company.com"
+  auth_method: "kubernetes"
+  role: "data-platform-prod"
+  
+  secrets:
+    # Database secrets
+    postgres_username: "secret/database/postgres/username"
+    postgres_password: "secret/database/postgres/password"
+    airflow_db_password: "secret/database/airflow/password"
+    mlflow_db_password: "secret/database/mlflow/password"
+    
+    # AWS secrets
+    aws_s3_access_key: "secret/aws/s3/access_key"
+    aws_s3_secret_key: "secret/aws/s3/secret_key"
+    
+    # Airflow secrets
+    airflow_admin_password: "secret/airflow/admin_password"
+    airflow_fernet_key: "secret/airflow/fernet_key"
+    airflow_webserver_secret: "secret/airflow/webserver_secret"
+    
+    # API keys
+    kafka_api_key: "secret/kafka/api_key"
+    monitoring_api_key: "secret/monitoring/api_key"

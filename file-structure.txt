@@ -1,0 +1,105 @@
+.
+├── 1-research
+│   ├── findings
+│   ├── notebooks
+│   └── scripts
+├── 2-src
+│   ├── data_processing
+│   ├── ml_models
+│   ├── streaming
+│   └── utils
+├── 3-workflows
+├── 4-integration-tests
+├── 5-config
+│   ├── development
+│   │   ├── airflow.yml
+│   │   ├── kafka.yml
+│   │   ├── mlflow.yml
+│   │   ├── network.yml
+│   │   ├── postgresql.yml
+│   │   └── spark.yml
+│   ├── production
+│   │   ├── airflow.yml
+│   │   ├── kafka.yml
+│   │   ├── mlflow.yml
+│   │   ├── network.yml
+│   │   ├── postgresql.yml
+│   │   ├── spark.yml
+│   │   └── vault.yml
+│   └── staging
+│       ├── airflow.yml
+│       ├── kafka.yml
+│       ├── mlflow.yml
+│       ├── network.yml
+│       ├── postgresql.yml
+│       └── spark.yml
+├── 6-infrastructure
+│   ├── 2-src
+│   ├── 3-workflows
+│   │   └── astronomer_dags
+│   │       ├── __pycache__
+│   │       └── astronomer_monitoring_dag.py
+│   ├── docker
+│   │   ├── 1-kafka
+│   │   │   ├── Dockerfile
+│   │   │   ├── Dockerfile:Zone.Identifier
+│   │   │   ├── config
+│   │   │   ├── connectors
+│   │   │   ├── data
+│   │   │   ├── docker-compose.yaml
+│   │   │   ├── docker-compose.yaml:Zone.Identifier
+│   │   │   ├── start-connect.sh
+│   │   │   ├── start-connect.sh:Zone.Identifier
+│   │   │   ├── start-kafka.sh
+│   │   │   └── start-kafka.sh:Zone.Identifier
+│   │   ├── 2-spark
+│   │   │   ├── docker-compose.yml
+│   │   │   ├── spark
+│   │   │   └── spark-client
+│   │   ├── 3-airflow
+│   │   │   ├── Dockerfile
+│   │   │   ├── config
+│   │   │   ├── dags
+│   │   │   ├── docker-compose.yaml
+│   │   │   ├── logs
+│   │   │   ├── packages.txt
+│   │   │   ├── plugins
+│   │   │   └── requirements.txt
+│   │   ├── 4-mlflow
+│   │   │   ├── Dockerfile
+│   │   │   ├── docker-compose.yaml
+│   │   │   ├── healthcheck.py
+│   │   │   └── spark_mlflow_test.py
+│   │   └── 5-postgresql
+│   │       ├── docker-compose.yaml
+│   │       └── init.sql
+│   ├── kubernetes
+│   ├── logs
+│   │   └── airflow
+│   │       ├── dag_processor_manager
+│   │       └── scheduler
+│   ├── models
+│   └── terraform
+├── 7-monitoring
+├── README.md
+├── docker-compose.yml
+├── environment.yml
+├── file-structure.txt
+├── logs
+│   ├── airflow
+│   ├── kafka
+│   ├── mlflow
+│   ├── postgres
+│   └── spark
+├── models
+│   ├── anomaly_detection
+│   ├── customer_segmentation
+│   └── energy_forecasting
+├── scripts
+│   ├── setup
+│   │   └── setup_environment.sh
+│   ├── start_platform.sh
+│   └── stop_platform.sh
+└── tests
+
+58 directories, 45 files

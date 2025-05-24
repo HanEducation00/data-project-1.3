@@ -1,0 +1,17 @@
+network:
+  name: "data-platform-production"
+  driver: "bridge"
+  subnet: "172.32.0.0/16"
+  
+  ip_ranges:
+    kafka: "172.32.10.0/24"
+    spark: "172.32.20.0/24"
+    airflow: "172.32.30.0/24"
+    mlflow: "172.32.40.0/24"
+    postgres: "172.32.50.0/24"
+    monitoring: "172.32.60.0/24"
+    
+  security:
+    enable_network_isolation: true
+    allow_external_access: false
+    encrypted_communication: true

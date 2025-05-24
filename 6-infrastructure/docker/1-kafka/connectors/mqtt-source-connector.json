@@ -1,0 +1,15 @@
+{
+  "name": "mqtt-source-connector",
+  "config": {
+    "connector.class": "io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector",
+    "tasks.max": "1",
+    "connect.mqtt.hosts": "tcp://mqtt3:1883",
+    "connect.mqtt.client.id": "mqtt-source-client",
+    "connect.mqtt.service.quality": "1",
+    "connect.mqtt.kcql": "INSERT INTO sensor-topic-accelerometer SELECT * FROM sensor/accelerometer WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`;INSERT INTO sensor-topic-gyroscope SELECT * FROM sensor/gyroscope WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`;INSERT INTO sensor-topic-light SELECT * FROM sensor/light WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`;INSERT INTO sensor-topic-magnetometer SELECT * FROM sensor/magnetometer WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`;INSERT INTO sensor-topic-proximity SELECT * FROM sensor/proximity WITHCONVERTER=`io.lenses.streamreactor.connect.converters.source.JsonSimpleConverter`",
+    "connect.mqtt.message.processor": "io.lenses.streamreactor.connect.mqtt.source.processors.SourceRecordStringProcessor",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

@@ -1,0 +1,26 @@
+postgresql:
+  main_db:
+    host: "postgres"
+    port: 5432
+    database: "datawarehouse"
+    username: "${POSTGRES_USER}"      # From .env
+    password: "${POSTGRES_PASSWORD}"  # From .env
+    
+  airflow_db:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "${AIRFLOW_DB_PASSWORD}"  # From .env
+    
+  mlflow_db:
+    host: "mlflow-postgres"
+    port: 5432
+    database: "mlflow"
+    username: "mlflow"
+    password: "${MLFLOW_DB_PASSWORD}"   # From .env
+    
+  settings:
+    max_connections: 50
+    shared_buffers: "256MB"
+    effective_cache_size: "512MB"

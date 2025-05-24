@@ -1,0 +1,31 @@
+postgresql:
+  main_db:
+    host: "postgres-prod-cluster.company.com"  # External managed DB
+    port: 5432
+    database: "datawarehouse_prod"
+    username: "${vault:secret/postgres/username}"
+    password: "${vault:secret/postgres/password}"
+    read_replica: "postgres-prod-readonly.company.com"
+    
+  airflow_db:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "${vault:secret/airflow/db_password}"
+    
+  mlflow_db:
+    host: "mlflow-postgres"
+    port: 5432
+    database: "mlflow"
+    username: "mlflow"
+    password: "${vault:secret/mlflow/db_password}"
+    
+  settings:
+    max_connections: 200
+    shared_buffers: "1GB"
+    effective_cache_size: "2GB"
+    maintenance_work_mem: "256MB"
+    checkpoint_completion_target: 0.9
+    wal_buffers: "16MB"
+    default_statistics_target: 100

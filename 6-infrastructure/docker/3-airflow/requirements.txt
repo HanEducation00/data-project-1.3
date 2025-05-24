@@ -1,0 +1,4 @@
+apache-airflow-providers-common-compat==1.2.2
+apache-airflow-providers-apache-spark==4.11.3
+airflow-provider-mlflow==1.1.0
+mlflow-skinny==2.3.2

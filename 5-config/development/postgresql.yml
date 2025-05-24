@@ -1,0 +1,26 @@
+postgresql:
+  main_db:
+    host: "postgres"
+    port: 5432
+    database: "datawarehouse"
+    username: "datauser"
+    password: "datapass"
+    
+  airflow_db:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "airflow"
+    
+  mlflow_db:
+    host: "mlflow-postgres"
+    port: 5432
+    database: "mlflow"
+    username: "mlflow"
+    password: "mlflow"
+    
+  settings:
+    max_connections: 20
+    shared_buffers: "128MB"
+    effective_cache_size: "256MB"

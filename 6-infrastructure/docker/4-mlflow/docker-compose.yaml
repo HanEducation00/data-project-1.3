@@ -1,0 +1,133 @@
+# MLflow - Simplified for Testing
+version: '3.8'
+
+services:
+  mlflow-postgres:
+    image: postgres:16
+    container_name: mlflow-postgres
+    hostname: mlflow-postgres
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.40.11
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+      POSTGRES_DB: mlflow
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - mlflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "mlflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: mlflow-minio
+    hostname: mlflow-minio
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.40.12
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - mlflow-minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc
+    container_name: mlflow-minio-init
+    hostname: mlflow-minio-init
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.40.15
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Initializing MinIO for development';
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/mlflow --ignore-existing;
+      /usr/bin/mc policy set public myminio/mlflow;
+      echo 'MinIO initialization completed';
+      exit 0;
+      "
+    restart: "no"
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mlflow-server
+    container_name: mlflow-server
+    hostname: mlflow-server
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.40.10
+    depends_on:
+      mlflow-postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_HOST=0.0.0.0
+      - MLFLOW_PORT=5000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - MLFLOW_TRACKING_URI=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
+    volumes:
+      - shared-models:/models
+    command: 
+      - server
+      - --backend-store-uri=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
+      - --artifacts-destination=s3://mlflow/
+      - --serve-artifacts
+      - --host=0.0.0.0
+      - --port=5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+# Volumes
+volumes:
+  shared-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/../../models
+  mlflow-postgres-data:
+    driver: local
+  mlflow-minio-data:
+    driver: local
+
+# Network
+networks:
+  data-platform-dev:
+    name: data-platform-dev
+    driver: bridge
+    external: true

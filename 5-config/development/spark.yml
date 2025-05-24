@@ -1,0 +1,33 @@
+spark:
+  master:
+    hostname: "spark-master"
+    ports:
+      spark: 7077
+      ui: 8080
+    ip_address: "172.30.20.10"
+    
+  workers:
+    worker1:
+      hostname: "spark-worker-1"
+      memory: "1g"
+      cores: 1
+      ports:
+        ui: 8081
+      ip_address: "172.30.20.11"
+    worker2:
+      hostname: "spark-worker-2"
+      memory: "1g"
+      cores: 1
+      ports:
+        ui: 8082
+      ip_address: "172.30.20.12"
+        
+  client:
+    hostname: "spark-client"
+    ip_address: "172.30.20.20"
+    
+  settings:
+    executor_memory: "512m"
+    driver_memory: "512m"
+    max_result_size: "1g"
+    serializer: "org.apache.spark.serializer.KryoSerializer"

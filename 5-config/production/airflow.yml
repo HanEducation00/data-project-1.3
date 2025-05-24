@@ -1,0 +1,35 @@
+airflow:
+  webserver:
+    port: 8088
+    host: "0.0.0.0"
+    
+  scheduler:
+    dag_dir_list_interval: 30
+    
+  database:
+    host: "airflow-postgres"
+    port: 5432
+    database: "airflow"
+    username: "airflow"
+    password: "${vault:secret/airflow/db_password}"  # From Vault
+    
+  connections:
+    kafka: "kafka://kafka1:9092,kafka2:9092,kafka3:9092"
+    postgres: "postgres://${vault:secret/postgres/username}:${vault:secret/postgres/password}@postgres:5432/datawarehouse"
+    spark: "spark://spark-master:7077"
+    mlflow: "http://mlflow:5000"
+    
+  executor: "LocalExecutor"
+  load_examples: false
+  
+  auth:
+    backend: "airflow.api.auth.backend.basic_auth"
+    
+  admin:
+    username: "admin"
+    password: "${vault:secret/airflow/admin_password}"  # From Vault
+    email: "admin@company.com"
+    
+  security:
+    fernet_key: "${vault:secret/airflow/fernet_key}"
+    webserver_secret: "${vault:secret/airflow/webserver_secret}"

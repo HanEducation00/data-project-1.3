@@ -1,0 +1,50 @@
+name: data-platform-1.2
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  # Python version
+  - python=3.9
+  
+  # Temel veri analizi kütüphaneleri
+  - pandas=2.2.1
+  - numpy=1.26.4
+  - matplotlib=3.8.3
+  - seaborn=0.13.1
+  
+  # Interaktif geliştirme için
+  - jupyter=1.0.0
+  - jupyterlab=4.1.4
+  
+  # Büyük veri işleme için
+  - pyspark=3.5.1
+  
+  # PostgreSQL bağlantısı
+  - sqlalchemy=2.0.29
+  - psycopg2=2.9.9
+  
+  # Veri dosyalarını okumak için
+  - openpyxl=3.1.2
+  
+  # Ek yardımcı kütüphaneler
+  - tqdm=4.66.2
+  - python-dotenv=1.0.1
+  - requests=2.31.0
+  
+  # Plotly görselleştirmeler
+  - plotly=5.19.0
+  
+  # pip dependencies (conda'da olmayan paketler)
+  - pip
+  - pip:
+    # Kafka entegrasyonu
+    - kafka-python==2.0.2
+    
+    # Spark helper
+    - findspark==2.0.1
+    
+    # DBT entegrasyonu
+    - dbt-postgres==1.7.3
+    
+    # Dash
+    - dash==2.16.1

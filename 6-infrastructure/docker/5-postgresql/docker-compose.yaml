@@ -1,0 +1,62 @@
+# PostgreSQL - Environment Aware Configuration (Network Fixed)
+# Usage: ENVIRONMENT=development docker-compose up
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    hostname: postgres
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.50.10
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-datauser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datapass}
+      POSTGRES_DB: ${POSTGRES_DB:-datawarehouse}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - shared-logs:/postgres-logs
+    command: >
+      bash -c "
+      echo '=== Starting PostgreSQL for Development ===';
+      echo 'Database: ${POSTGRES_DB:-datawarehouse}';
+      echo 'User: ${POSTGRES_USER:-datauser}';
+      
+      exec docker-entrypoint.sh postgres
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-datauser} -d ${POSTGRES_DB:-datawarehouse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+# Volumes
+volumes:
+  postgres-data:
+    driver: local
+  shared-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/han/projects/data-project-1.2/logs
+
+# Network - önce oluşturmak lazım
+networks:
+  data-platform-dev:
+    name: data-platform-dev
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1

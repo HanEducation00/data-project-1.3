@@ -1,0 +1,193 @@
+# Spark Cluster - Simplified for Testing
+version: '3.8'
+
+services:
+  spark-master:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.20.10
+    volumes:
+      - spark-data:/opt/spark/data
+      - ./spark/spark-master.sh:/spark-master.sh
+      - shared-workspace:/workspace
+      - shared-models:/models
+      - shared-integration-tests:/integration-tests
+    command: /spark-master.sh
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://spark-master:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  spark-worker-1:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.20.11
+    volumes:
+      - spark-data:/opt/spark/data
+      - ./spark/spark-worker.sh:/spark-worker.sh
+      - shared-workspace:/workspace
+      - shared-models:/models
+      - ./4-integration-tests:/integration-tests
+    command: /spark-worker.sh
+    environment:
+      - SPARK_LOCAL_IP=spark-worker-1
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
+      - SPARK_WORKER_PORT=7078
+      - SPARK_WORKER_WEBUI_PORT=8081
+
+  spark-worker-2:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    ports:
+      - "8082:8081"
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.20.12
+    volumes:
+      - spark-data:/opt/spark/data
+      - ./spark/spark-worker.sh:/spark-worker.sh
+      - shared-workspace:/workspace
+      - shared-models:/models
+      - ./4-integration-tests:/integration-tests
+    command: /spark-worker.sh
+    environment:
+      - SPARK_LOCAL_IP=spark-worker-2
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
+      - SPARK_WORKER_PORT=7079
+      - SPARK_WORKER_WEBUI_PORT=8081
+
+  spark-worker-3:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker-3
+    hostname: spark-worker-3
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    ports:
+      - "8083:8081"
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.20.13
+    volumes:
+      - spark-data:/opt/spark/data
+      - ./spark/spark-worker.sh:/spark-worker.sh
+      - shared-workspace:/workspace
+      - shared-models:/models
+      - ./4-integration-tests:/integration-tests
+    command: /spark-worker.sh
+    environment:
+      - SPARK_LOCAL_IP=spark-worker-3
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1g
+      - SPARK_WORKER_PORT=7080
+      - SPARK_WORKER_WEBUI_PORT=8081
+
+  spark-client:
+    build:
+      context: ./spark-client
+      dockerfile: Dockerfile
+    container_name: spark-client
+    hostname: spark-client
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    networks:
+      data-platform-dev:
+        ipv4_address: 172.30.20.20
+    volumes:
+      - src-code:/workspace/src
+      - shared-models:/models
+      - shared-integration-tests:/integration-tests
+    environment:
+      - SPARK_LOCAL_IP=spark-client
+      - SPARK_MASTER=spark://spark-master:7077
+      - PYTHONPATH=/workspace/src  # PYTHONPATH'i src dizinine ayarla
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+    command: >
+      bash -c "
+        echo 'Spark Client ready!'
+        echo 'Workspace: /workspace'
+        echo 'Source code: /workspace/src (from 2-src/)'
+        echo 'Models: /models'
+        touch /workspace/src/__init__.py
+        tail -f /dev/null
+      "
+
+# Shared volumes
+volumes:
+  src-code:  # 2-src için yeni bir named volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/han/projects/data-project-1.2/2-src
+
+  shared-workspace:  # Bu volume'u koruyoruz
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/han/projects/data-project-1.2
+
+  shared-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/han/projects/data-project-1.2/models
+  shared-integration-tests:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/han/projects/data-project-1.2/4-integration-tests
+
+  spark-data:
+    driver: local
+
+# Network
+networks:
+  data-platform-dev:
+    name: data-platform-dev
+    driver: bridge
+    external: true
