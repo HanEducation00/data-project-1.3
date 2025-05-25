@@ -1,8 +1,5 @@
 # PostgreSQL - Environment Aware Configuration (Network Fixed)
 # Usage: ENVIRONMENT=development docker-compose up
-
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16

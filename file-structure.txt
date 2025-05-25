@@ -1,15 +1,53 @@
 .
 ├── 1-research
 │   ├── findings
+│   │   ├── customer_comparison_day_1.png
+│   │   ├── customer_res_18572_day_1_profile.png
+│   │   └── monthly_average_consumption.png
 │   ├── notebooks
+│   │   ├── data_exploration-1.ipynb
+│   │   └── data_exploration-2.ipynb
 │   └── scripts
 ├── 2-src
+│   ├── 1-test-spark.py
+│   ├── __init__.py
+│   ├── checkpoints
+│   │   └── kafka-spark-streaming
 │   ├── data_processing
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── aggregation.py
+│   │   ├── schema.py
+│   │   ├── transformation.py
+│   │   └── validation.py
 │   ├── ml_models
+│   ├── run.py
 │   ├── streaming
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   ├── app.py
+│   │   ├── batch_processor.py
+│   │   └── pipeline.py
 │   └── utils
+│       ├── __init__.py
+│       ├── __pycache__
+│       ├── config.py
+│       ├── connections.py
+│       └── logger.py
 ├── 3-workflows
+│   ├── __pycache__
+│   │   ├── test2_spark_dag.cpython-312.pyc
+│   │   ├── test_1_integration_dag_modular.cpython-312.pyc
+│   │   ├── test_1_spark_dag.cpython-312.pyc
+│   │   ├── test_2_spark_dag.cpython-312.pyc
+│   │   └── test_all_integration_dag_modular.cpython-312.pyc
+│   ├── test_1_spark_dag.py
+│   └── test_all_integration_dag_modular.py
 ├── 4-integration-tests
+│   ├── test1_kafka_spark.py
+│   ├── test2_kafka_spark_sql.py
+│   ├── test3_spark_mlflow.py
+│   └── test4_spark_mlfow_airflow.py
 ├── 5-config
 │   ├── development
 │   │   ├── airflow.yml
@@ -34,50 +72,17 @@
 │       ├── postgresql.yml
 │       └── spark.yml
 ├── 6-infrastructure
-│   ├── 2-src
-│   ├── 3-workflows
-│   │   └── astronomer_dags
-│   │       ├── __pycache__
-│   │       └── astronomer_monitoring_dag.py
 │   ├── docker
 │   │   ├── 1-kafka
-│   │   │   ├── Dockerfile
-│   │   │   ├── Dockerfile:Zone.Identifier
-│   │   │   ├── config
-│   │   │   ├── connectors
-│   │   │   ├── data
-│   │   │   ├── docker-compose.yaml
-│   │   │   ├── docker-compose.yaml:Zone.Identifier
-│   │   │   ├── start-connect.sh
-│   │   │   ├── start-connect.sh:Zone.Identifier
-│   │   │   ├── start-kafka.sh
-│   │   │   └── start-kafka.sh:Zone.Identifier
 │   │   ├── 2-spark
-│   │   │   ├── docker-compose.yml
-│   │   │   ├── spark
-│   │   │   └── spark-client
 │   │   ├── 3-airflow
-│   │   │   ├── Dockerfile
-│   │   │   ├── config
-│   │   │   ├── dags
-│   │   │   ├── docker-compose.yaml
-│   │   │   ├── logs
-│   │   │   ├── packages.txt
-│   │   │   ├── plugins
-│   │   │   └── requirements.txt
 │   │   ├── 4-mlflow
-│   │   │   ├── Dockerfile
-│   │   │   ├── docker-compose.yaml
-│   │   │   ├── healthcheck.py
-│   │   │   └── spark_mlflow_test.py
 │   │   └── 5-postgresql
-│   │       ├── docker-compose.yaml
-│   │       └── init.sql
 │   ├── kubernetes
 │   ├── logs
 │   │   └── airflow
-│   │       ├── dag_processor_manager
-│   │       └── scheduler
+│   ├── logs:
+│   │   └── var
 │   ├── models
 │   └── terraform
 ├── 7-monitoring
@@ -87,6 +92,12 @@
 ├── file-structure.txt
 ├── logs
 │   ├── airflow
+│   │   ├── dag_id=integration_test_dag_modular
+│   │   ├── dag_id=new_version_1_1
+│   │   ├── dag_id=simple_test_dag
+│   │   ├── dag_id=test2_spark_health_check
+│   │   ├── dag_processor_manager
+│   │   └── scheduler
 │   ├── kafka
 │   ├── mlflow
 │   ├── postgres
@@ -100,6 +111,8 @@
 │   │   └── setup_environment.sh
 │   ├── start_platform.sh
 │   └── stop_platform.sh
+├── test4_ml_pipeline_dag.py
+├── test5_ml_pipeline_dag.py
 └── tests
 
-58 directories, 45 files
+56 directories, 60 files

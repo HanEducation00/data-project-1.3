@@ -1,6 +1,4 @@
 # Kafka Cluster - Simplified for Testing
-version: '3.8'
-
 services:
   kafka1:
     image: kafka:3.6.1

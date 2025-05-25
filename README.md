@@ -87,3 +87,9 @@ docker cp 4-integration-tests/test2/spark_consumer/test2_spark_consumer.py spark
 
 # Yeniden çalıştır
 docker exec spark-client python3 /tmp/test2_spark_consumer.py
+
+### Linux Komutları
+cd ~/projects/data-project-1.2/6-infrastructure/docker
+
+### RUN COMAND
+python -m streaming.app

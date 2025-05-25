@@ -1,6 +1,4 @@
 # Airflow - Simplified for Testing
-version: '3.8'
-
 x-airflow-common: &airflow-common
   image: ${AIRFLOW_IMAGE_NAME:-my-airflow-image-1}
   user: "${AIRFLOW_UID:-50000}:0"
