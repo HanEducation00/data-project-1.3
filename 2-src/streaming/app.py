@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Elektrik Yük Tahmini - Ana Uygulama
+"""Elektrik Yük Tahmini - Ana Uygulama
 
 Bu script, Kafka'dan gelen elektrik yük verilerini alır, işler,
-aylık ortalama elektrik tüketimini hesaplar ve sonuçları PostgreSQL'e yazar.
-"""
+aylık ortalama elektrik tüketimini hesaplar ve sonuçları PostgreSQL'e yazar."""
 
 import sys
 import signal
 import time
 from utils.logger import get_logger, setup_root_logger
+from data_processing.database import create_tables  # Database fonksiyonunu import et
 from .pipeline import ElectricLoadPipeline
 
 # Kök logger'ı yapılandır
@@ -40,13 +39,18 @@ def main():
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
         
+        # Veritabanı tablolarını oluştur
+        logger.info("Veritabanı tabloları oluşturuluyor...")
+        create_tables()
+        logger.info("Veritabanı tabloları hazır.")
+        
         # Pipeline'ı başlat
         pipeline = ElectricLoadPipeline()
         pipeline.initialize().start()
         
         # Streaming işleminin tamamlanmasını bekle
         pipeline.await_termination()
-        
+    
     except Exception as e:
         logger.error(f"Uygulama çalışırken beklenmeyen hata: {str(e)}")
         if pipeline:

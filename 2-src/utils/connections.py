@@ -18,24 +18,24 @@ logger = logging.getLogger(__name__)
 
 def create_spark_session():
     """
-    Spark Session oluşturur ve yapılandırır.
+    Spark Session oluşturur ve yapılandırır - geliştirme ortamı için local mode.
     
     Returns:
         SparkSession: Yapılandırılmış spark session nesnesi
     """
     try:
-        # Spark session'ı oluştur
+        # Spark session'ı oluştur - geliştirme için local mode
         spark = SparkSession.builder \
             .appName(config.SPARK_CONFIG["app_name"]) \
             .config("spark.jars.packages", config.SPARK_CONFIG["packages"]) \
             .config("spark.streaming.stopGracefullyOnShutdown", "true") \
-            .master(config.SPARK_CONFIG["master"]) \
+            .master("local[*]") \
             .getOrCreate()
         
         # Log seviyesini ayarla
         spark.sparkContext.setLogLevel(config.SPARK_CONFIG["log_level"])
         
-        logger.info(f"Spark session oluşturuldu. Versiyon: {spark.version}")
+        logger.info(f"Spark session oluşturuldu (local[*] mode). Versiyon: {spark.version}")
         return spark
     
     except Exception as e:
@@ -114,6 +114,7 @@ def read_kafka_stream(spark):
             .option("kafka.bootstrap.servers", config.KAFKA_CONFIG["bootstrap_servers"]) \
             .option("subscribe", config.KAFKA_CONFIG["topic"]) \
             .option("startingOffsets", config.KAFKA_CONFIG["starting_offsets"]) \
+            .option("failOnDataLoss", "false") \
             .load()
         
         # JSON değerini string olarak al
@@ -128,21 +129,30 @@ def read_kafka_stream(spark):
 
 def write_to_postgres(df, table_name, mode="append"):
     """
-    DataFrame'i PostgreSQL'e yazar.
+    DataFrame'i PostgreSQL veritabanına yazar.
     
     Args:
         df (DataFrame): Yazılacak DataFrame
         table_name (str): Hedef tablo adı
-        mode (str): Yazma modu ("append", "overwrite", "ignore", "error")
+        mode (str): Yazma modu (append, overwrite, vb.)
     """
     try:
+        logger.info(f"Veriler {table_name} tablosuna yazılıyor (mod: {mode})...")
+        
+        # JDBC URL'yi oluştur
+        jdbc_url = f"jdbc:postgresql://{config.POSTGRES_CONFIG['host']}:{config.POSTGRES_CONFIG['port']}/{config.POSTGRES_CONFIG['database']}"
+        
+        # DataFrame'i PostgreSQL'e yaz
         df.write \
-            .jdbc(
-                url=config.JDBC_URL, 
-                table=table_name, 
-                mode=mode, 
-                properties=config.JDBC_PROPERTIES
-            )
+            .format("jdbc") \
+            .option("url", jdbc_url) \
+            .option("dbtable", table_name) \
+            .option("user", config.POSTGRES_CONFIG["user"]) \
+            .option("password", config.POSTGRES_CONFIG["password"]) \
+            .option("driver", config.POSTGRES_CONFIG["driver"]) \
+            .option("stringtype", "unspecified") \
+            .mode(mode) \
+            .save()
         
         logger.info(f"Veriler {table_name} tablosuna yazıldı (mod: {mode})")
     

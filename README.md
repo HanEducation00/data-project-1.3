@@ -28,6 +28,8 @@ nc -zv localhost 9392  # kafka3
 
 # Topic listesini göster:
 docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+# Topic listesini sil:
+docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic sensor-data
 
 # Yeni topic oluştur (test için):
 docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic zurna-test --partitions 3 --replication-factor 2
