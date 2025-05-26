@@ -134,6 +134,7 @@ services:
       - ../../../2-src:/workspace
       - ../../../models:/models
       - ../../../4-integration-tests:/integration-tests
+      - /home/han/data:/data
     environment:
       - SPARK_LOCAL_IP=spark-client
       - SPARK_MASTER=spark://spark-master:7077
