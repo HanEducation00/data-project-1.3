@@ -36,12 +36,12 @@ x-airflow-common: &airflow-common
     # Önerilen ek ayarlar
     - AIRFLOW__CORE__DAG_DISCOVERY_SAFE_MODE=False
   volumes:
-    - shared-workflows:/usr/local/airflow/dags
-    - shared-logs:/usr/local/airflow/logs
+    - ../../../3-workflows:/usr/local/airflow/dags
+    - ../../../logs/airflow:/usr/local/airflow/logs
     - ./plugins:/usr/local/airflow/plugins
     - ./config:/usr/local/airflow/config
-    - shared-workspace:/workspace
-    - shared-models:/models
+    - ../../../2-src:/workspace
+    - ../../../models:/models
   restart: unless-stopped
 
 services:
@@ -188,32 +188,8 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-# Volumes
+# Volumes - Sadeleştirilmiş
 volumes:
-  shared-workflows:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/han/projects/data-project-1.2/3-workflows
-  shared-workspace:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/han/projects/data-project-1.2/2-src
-  shared-models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/han/projects/data-project-1.2/models
-  shared-logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/han/projects/data-project-1.2/logs/airflow
   airflow-postgres-data:
     driver: local
 

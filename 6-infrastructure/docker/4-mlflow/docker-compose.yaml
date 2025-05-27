@@ -97,8 +97,9 @@ services:
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
       - MLFLOW_TRACKING_URI=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
     volumes:
-      - shared-models:/models
-    command: 
+      - ../../../models:/models
+      - ../../../logs/mlflow:/logs
+    command:
       - server
       - --backend-store-uri=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
       - --artifacts-destination=s3://mlflow/
@@ -112,14 +113,8 @@ services:
       retries: 5
     restart: unless-stopped
 
-# Volumes
+# Volumes - Sadeleştirilmiş
 volumes:
-  shared-models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/../../models
   mlflow-postgres-data:
     driver: local
   mlflow-minio-data:
