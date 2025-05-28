@@ -95,3 +95,8 @@ cd ~/projects/data-project-1.2/6-infrastructure/docker
 
 ### RUN COMAND
 python -m streaming.app
+
+
+#### spark client
+pip install pyspark==3.4.0
+apt-get update && apt-get install -y libgomp1
