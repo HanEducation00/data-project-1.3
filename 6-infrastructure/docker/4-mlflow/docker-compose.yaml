@@ -1,4 +1,4 @@
-# MLflow - Simplified for Testing
+# MLflow - Corrected Command Syntax
 version: '3.8'
 
 services:
@@ -61,11 +61,24 @@ services:
       - MINIO_ROOT_PASSWORD=minioadmin
     entrypoint: >
       /bin/sh -c "
-      echo 'Initializing MinIO for development';
-      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      echo '=== MinIO Initialization Starting ===';
+      
+      echo 'Waiting for MinIO to be fully ready...';
+      sleep 10;
+      
+      echo 'Configuring MinIO client with new syntax...';
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      
+      echo 'Creating mlflow bucket...';
       /usr/bin/mc mb myminio/mlflow --ignore-existing;
-      /usr/bin/mc policy set public myminio/mlflow;
-      echo 'MinIO initialization completed';
+      
+      echo 'Setting bucket policy to public with new syntax...';
+      /usr/bin/mc anonymous set public myminio/mlflow;
+      
+      echo 'Verifying bucket creation...';
+      /usr/bin/mc ls myminio/ | grep mlflow;
+      
+      echo '✅ MinIO initialization completed successfully!';
       exit 0;
       "
     restart: "no"
@@ -106,14 +119,24 @@ services:
       - --serve-artifacts
       - --host=0.0.0.0
       - --port=5000
+      - --gunicorn-opts=--timeout 600 --workers 2 --worker-class sync --max-requests 1000
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
-      timeout: 10s
-      retries: 5
+      timeout: 20s
+      retries: 8
+      start_period: 90s
     restart: unless-stopped
 
-# Volumes - Sadeleştirilmiş
+# Volumes
 volumes:
   mlflow-postgres-data:
     driver: local
