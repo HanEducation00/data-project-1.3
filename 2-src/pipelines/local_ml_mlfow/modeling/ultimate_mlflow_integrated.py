@@ -400,15 +400,8 @@ def ultimate_mlflow_pipeline():
             
             print(f"✅ Model logged: {model_info.model_uri}")
             
-            # 12. ARTIFACTS & METADATA
+            # 12. ADDITIONAL ARTIFACTS
             print("\n1️⃣2️⃣ ADDITIONAL ARTIFACTS...")
-            
-            # Save sample predictions
-            sample_predictions = test_predictions.select("date", "customer_id", target, "prediction").limit(10).toPandas()
-            
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
-                sample_predictions.to_csv(f.name, index=False)
-                mlflow.log_artifact(f.name, "sample_predictions.csv")
             
             # Log run summary
             overall_time = time.time() - overall_start
