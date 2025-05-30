@@ -32,7 +32,7 @@ docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 
 docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic sensor-data
 
 # Yeni topic oluştur (test için):
-docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic zurna-test --partitions 3 --replication-factor 2
+docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic sensor-data --partitions 3 --replication-factor 3
 
 # Topic'i doğrula:
 docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic zurna-test
