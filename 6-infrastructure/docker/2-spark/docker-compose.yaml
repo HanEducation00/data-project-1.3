@@ -10,7 +10,7 @@ services:
       - "8080:8080"
       - "7077:7077"
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.20.10
     volumes:
       - spark-data:/opt/spark/data
@@ -43,7 +43,7 @@ services:
     ports:
       - "8081:8081"
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.20.11
     volumes:
       - spark-data:/opt/spark/data
@@ -72,7 +72,7 @@ services:
     ports:
       - "8082:8081"
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.20.12
     volumes:
       - spark-data:/opt/spark/data
@@ -101,7 +101,7 @@ services:
     ports:
       - "8083:8081"
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.20.13
     volumes:
       - spark-data:/opt/spark/data
@@ -128,7 +128,7 @@ services:
       spark-master:
         condition: service_healthy
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.20.20
     volumes:
       - ../../../2-src:/workspace
@@ -154,13 +154,3 @@ services:
       "
 
 # Network
-networks:
-  data-platform-dev:
-    name: data-platform-dev
-    driver: bridge
-    external: true
-
-# Volumes
-volumes:
-  spark-data:
-    driver: local

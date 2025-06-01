@@ -7,8 +7,7 @@ services:
     container_name: postgres
     hostname: postgres
     networks:
-      data-platform-dev:
-        ipv4_address: 172.30.50.10
+      - data-platform                              # ← Simplified!
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-datauser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datapass}
@@ -28,7 +27,6 @@ services:
       echo 'User: ${POSTGRES_USER:-datauser}';
       echo 'Log directory: /postgres-logs';
       
-      # Create log directory if it doesn't exist
       mkdir -p /postgres-logs;
       chmod 755 /postgres-logs;
       
@@ -42,18 +40,8 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-# Volumes - Sadeleştirilmiş
 volumes:
   postgres-data:
     driver: local
 
-# Network
-networks:
-  data-platform-dev:
-    name: data-platform-dev
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.30.0.0/16
-          gateway: 172.30.0.1
+# External network - Master'dan geliyor

@@ -1,5 +1,4 @@
 # MLflow - Corrected Command Syntax
-version: '3.8'
 
 services:
   mlflow-postgres:
@@ -7,7 +6,7 @@ services:
     container_name: mlflow-postgres
     hostname: mlflow-postgres
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.40.11
     environment:
       POSTGRES_USER: mlflow
@@ -28,7 +27,7 @@ services:
     container_name: mlflow-minio
     hostname: mlflow-minio
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.40.12
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -51,7 +50,7 @@ services:
     container_name: mlflow-minio-init
     hostname: mlflow-minio-init
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.40.15
     depends_on:
       minio:
@@ -91,7 +90,7 @@ services:
     container_name: mlflow-server
     hostname: mlflow-server
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.40.10
     depends_on:
       mlflow-postgres:
@@ -144,8 +143,3 @@ volumes:
     driver: local
 
 # Network
-networks:
-  data-platform-dev:
-    name: data-platform-dev
-    driver: bridge
-    external: true

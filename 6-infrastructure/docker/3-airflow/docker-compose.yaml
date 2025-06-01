@@ -28,7 +28,6 @@ x-airflow-common: &airflow-common
     - AIRFLOW__ASTRONOMER__ANALYTICS_ENABLED=False
     - ASTRONOMER__ANALYTICS__ENABLED=False
     - AIRFLOW__WEBSERVER__NAVBAR_COLOR=#007A87
-    
     # Eklenmesi Gereken Yeni Ayarlar
     - AIRFLOW__CORE__STORE_DAG_CODE=True
     - AIRFLOW__WEBSERVER__SHOW_RECENT_STATS_FOR_COMPLETED_RUNS=True
@@ -50,7 +49,7 @@ services:
     container_name: airflow-postgres
     hostname: airflow-postgres
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.30.11
     environment:
       POSTGRES_USER: airflow
@@ -70,7 +69,7 @@ services:
     container_name: airflow-init
     user: "0:0"
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.30.15
     entrypoint: ["/bin/bash"]
     command:
@@ -94,7 +93,7 @@ services:
         
         echo "Creating roles..."
         airflow roles create Admin || echo "Admin role already exists"
-        airflow roles create Viewer || echo "Viewer role already exists" 
+        airflow roles create Viewer || echo "Viewer role already exists"
         airflow roles create User || echo "User role already exists"
         airflow roles create Op || echo "Op role already exists"
         
@@ -127,7 +126,7 @@ services:
     container_name: airflow-webserver
     hostname: airflow-webserver
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.30.10
     entrypoint: ["/bin/bash"]
     command:
@@ -165,7 +164,7 @@ services:
     container_name: airflow-scheduler
     hostname: airflow-scheduler
     networks:
-      data-platform-dev:
+      data-platform:                              # ← DEĞİŞTİ!
         ipv4_address: 172.30.30.12
     entrypoint: ["/bin/bash"]
     command:
@@ -194,8 +193,3 @@ volumes:
     driver: local
 
 # Network
-networks:
-  data-platform-dev:
-    name: data-platform-dev
-    driver: bridge
-    external: true

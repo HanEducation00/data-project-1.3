@@ -1,78 +1,37 @@
-# Master Docker Compose - Data Platform 1.2
-# Environment-Aware Orchestration
+# Master Docker Compose - Data Platform 1.3
+# Environment-Aware Orchestration - WSL Optimized
 # Usage: ENVIRONMENT=development docker-compose up
-
-version: '3.8'
 
 # Include all service compositions
 include:
-  - path: 6-infrastructure/docker/5-postgresql/docker-compose.yml
+  - path: 6-infrastructure/docker/5-postgresql/docker-compose.yaml
     env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/1-kafka/docker-compose.yml  
+  - path: 6-infrastructure/docker/1-kafka/docker-compose.yaml
     env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/2-spark/docker-compose.yml
+  - path: 6-infrastructure/docker/2-spark/docker-compose.yaml
     env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/4-mlflow/docker-compose.yml
+  - path: 6-infrastructure/docker/4-mlflow/docker-compose.yaml
     env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/3-airflow/docker-compose.yml
+  - path: 6-infrastructure/docker/3-airflow/docker-compose.yaml
     env_file: .env.${ENVIRONMENT:-development}
 
-# Global network setup
+# Dynamic network - Environment-aware
 networks:
-  data-platform-dev:
-    name: data-platform-dev
+  data-platform:                           # ← default yerine
+    name: ${NETWORK_NAME}
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.30.0.0/16
-          gateway: 172.30.0.1
+        - subnet: ${NETWORK_SUBNET}
+          gateway: ${NETWORK_GATEWAY}
     labels:
-      environment: "development"
-      project: "data-platform-1.2"
-      
-  data-platform-staging:
-    name: data-platform-staging
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.31.0.0/16
-          gateway: 172.31.0.1
-    labels:
-      environment: "staging"
-      project: "data-platform-1.2"
-      
-  data-platform-production:
-    name: data-platform-production
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.32.0.0/16
-          gateway: 172.32.0.1
-    labels:
-      environment: "production"
-      project: "data-platform-1.2"
+      environment: "${ENVIRONMENT:-development}"
+      project: "data-platform-1.3"
 
-# Global volumes for cross-service sharing
+# WSL-Optimized Volumes
 volumes:
-  # Source code sharing
-  shared-workspace:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./2-src
-      
-  shared-workflows:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./3-workflows
-      
-  # Configuration sharing
+  # Essential bind mounts only
   shared-configs:
     driver: local
     driver_opts:
@@ -80,25 +39,25 @@ volumes:
       o: bind
       device: ./5-config
       
-  # Data sharing
-  shared-models:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./models
-      
-  shared-data-processed:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/processed
-      
-  # Logging
   shared-logs:
     driver: local
     driver_opts:
       type: none
       o: bind
       device: ./logs
+    
+  # Docker managed - Better WSL performance
+  shared-workspace:
+    driver: local
+    
+  shared-workflows:
+    driver: local
+    
+  shared-models:
+    driver: local
+    
+  shared-data-processed:
+
+  spark-data:
+    driver: local
+  

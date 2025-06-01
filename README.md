@@ -100,3 +100,11 @@ python -m streaming.app
 #### spark client
 pip install pyspark==3.4.0
 apt-get update && apt-get install -y libgomp1
+
+
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+🌐 Airflow (Workflow Management): http://localhost:8088
+🌐 Spark Master (Cluster UI): http://localhost:8080
+🌐 MLflow (ML Tracking): http://localhost:5000
+🌐 MinIO (Object Storage): http://localhost:9000
