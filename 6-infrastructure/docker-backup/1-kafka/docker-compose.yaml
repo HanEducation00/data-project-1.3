@@ -1,0 +1,100 @@
+# Kafka Cluster - Simplified for Testing
+services:
+  kafka1:
+    image: kafka:3.6.1
+    build:
+      context: .
+    container_name: kafka1
+    hostname: kafka1
+    ports:
+      - "9191:9092"
+      - "9193:9093"
+      - "19092:19092"
+    networks:
+      data-platform:                              # ← DÜZELTİLDİ!
+        ipv4_address: 172.30.10.11
+    volumes:
+      - ./config/kafka1/server.properties:/kafka/config/server.properties
+      - ./data/kafka1/:/data/kafka/
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: "EfDXANVLQoKECKCwoSn9mA"
+    command: >
+      bash -c "
+        if [ ! -f /data/kafka/meta.properties ]; then
+          echo 'Formatting storage directory for Kafka 1'
+          /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
+        fi
+        /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  kafka2:
+    image: kafka:3.6.1
+    build:
+      context: .
+    container_name: kafka2
+    hostname: kafka2
+    ports:
+      - "9292:9092"
+      - "9293:9093"
+      - "29092:29092"
+    networks:
+      data-platform:                              # ← DÜZELTİLDİ!
+        ipv4_address: 172.30.10.12
+    volumes:
+      - ./config/kafka2/server.properties:/kafka/config/server.properties
+      - ./data/kafka2/:/data/kafka/
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: "EfDXANVLQoKECKCwoSn9mA"
+    command: >
+      bash -c "
+        if [ ! -f /data/kafka/meta.properties ]; then
+          echo 'Formatting storage directory for Kafka 2'
+          /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
+        fi
+        /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
+      "
+    depends_on:
+      - kafka1
+
+  kafka3:
+    image: kafka:3.6.1
+    build:
+      context: .
+    container_name: kafka3
+    hostname: kafka3
+    ports:
+      - "9392:9092"
+      - "9393:9093"
+      - "39092:39092"
+    networks:
+      data-platform:                              # ← DÜZELTİLDİ!
+        ipv4_address: 172.30.10.13
+    volumes:
+      - ./config/kafka3/server.properties:/kafka/config/server.properties
+      - ./data/kafka3/:/data/kafka/
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: broker,controller
+      CLUSTER_ID: "EfDXANVLQoKECKCwoSn9mA"
+    command: >
+      bash -c "
+        if [ ! -f /data/kafka/meta.properties ]; then
+          echo 'Formatting storage directory for Kafka 3'
+          /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
+        fi
+        /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
+      "
+    depends_on:
+      - kafka1
+      - kafka2
+

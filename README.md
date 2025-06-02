@@ -108,3 +108,12 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 🌐 Spark Master (Cluster UI): http://localhost:8080
 🌐 MLflow (ML Tracking): http://localhost:5000
 🌐 MinIO (Object Storage): http://localhost:9000
+
+# Development
+docker-compose --env-file .env.development up -d
+
+# Staging  
+docker-compose --env-file .env.staging up -d
+
+# Production
+docker-compose --env-file .env.production up -d

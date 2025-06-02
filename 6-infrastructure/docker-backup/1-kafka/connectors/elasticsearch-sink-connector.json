@@ -1,0 +1,29 @@
+{
+  "name": "elasticsearch-sink-connector",
+  "config": {
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "tasks.max": "12",
+    "topics.regex": "sensor-topic-(accelerometer|gyroscope|light|magnetometer|proximity)",
+    "connection.url": "http://es01:9200,http://es02:9200,http://es03:9200,http://es04:9200,http://es05:9200,http://es06:9200",
+    "key.ignore": "true",
+    "schema.ignore": "true",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true",
+    "behavior.on.null.values": "ignore",
+    "auto.create.indices.at.start": "false",
+    "write.method": "insert",
+    "max.retries": "5",
+    "retry.backoff.ms": "1000",
+    "batch.size": "5000",
+    "linger.ms": "100",
+    "max.in.flight.requests": "10",
+    "flush.timeout.ms": "10000",
+    "max.buffered.records": "50000",
+    "connection.timeout.ms": "10000",
+    "read.timeout.ms": "10000"
+  }
+}

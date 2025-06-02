@@ -1,17 +1,17 @@
-# Spark Cluster - Simplified for Testing
+# Spark Cluster - Dynamic Port Configuration
 services:
   spark-master:
     build:
       context: ./spark
       dockerfile: Dockerfile
-    container_name: spark-master
+    container_name: ${ENVIRONMENT:-development}-spark-master
     hostname: spark-master
     ports:
-      - "8080:8080"
-      - "7077:7077"
+      - "${SPARK_MASTER_WEBUI_PORT:-8080}:8080"        # ← DİNAMİK!
+      - "${SPARK_MASTER_CLUSTER_PORT:-7077}:7077"      # ← DİNAMİK!
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.20.10
+      data-platform:
+        ipv4_address: ${SPARK_IP_BASE}.10
     volumes:
       - spark-data:/opt/spark/data
       - ./spark/spark-master.sh:/spark-master.sh
@@ -35,16 +35,16 @@ services:
     build:
       context: ./spark
       dockerfile: Dockerfile
-    container_name: spark-worker-1
+    container_name: ${ENVIRONMENT:-development}-spark-worker-1
     hostname: spark-worker-1
     depends_on:
       spark-master:
         condition: service_healthy
     ports:
-      - "8081:8081"
+      - "${SPARK_WORKER_1_PORT:-8081}:8081"            # ← DİNAMİK!
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.20.11
+      data-platform:
+        ipv4_address: ${SPARK_IP_BASE}.11
     volumes:
       - spark-data:/opt/spark/data
       - ./spark/spark-worker.sh:/spark-worker.sh
@@ -57,23 +57,23 @@ services:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=1g
-      - SPARK_WORKER_PORT=7078
+      - SPARK_WORKER_PORT=${SPARK_WORKER_1_INTERNAL_PORT:-7078}    # ← DİNAMİK!
       - SPARK_WORKER_WEBUI_PORT=8081
 
   spark-worker-2:
     build:
       context: ./spark
       dockerfile: Dockerfile
-    container_name: spark-worker-2
+    container_name: ${ENVIRONMENT:-development}-spark-worker-2
     hostname: spark-worker-2
     depends_on:
       spark-master:
         condition: service_healthy
     ports:
-      - "8082:8081"
+      - "${SPARK_WORKER_2_PORT:-8082}:8081"            # ← DİNAMİK!
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.20.12
+      data-platform:
+        ipv4_address: ${SPARK_IP_BASE}.12
     volumes:
       - spark-data:/opt/spark/data
       - ./spark/spark-worker.sh:/spark-worker.sh
@@ -86,23 +86,23 @@ services:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=1g
-      - SPARK_WORKER_PORT=7079
+      - SPARK_WORKER_PORT=${SPARK_WORKER_2_INTERNAL_PORT:-7079}    # ← DİNAMİK!
       - SPARK_WORKER_WEBUI_PORT=8081
 
   spark-worker-3:
     build:
       context: ./spark
       dockerfile: Dockerfile
-    container_name: spark-worker-3
+    container_name: ${ENVIRONMENT:-development}-spark-worker-3
     hostname: spark-worker-3
     depends_on:
       spark-master:
         condition: service_healthy
     ports:
-      - "8083:8081"
+      - "${SPARK_WORKER_3_PORT:-8083}:8081"            # ← DİNAMİK!
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.20.13
+      data-platform:
+        ipv4_address: ${SPARK_IP_BASE}.13
     volumes:
       - spark-data:/opt/spark/data
       - ./spark/spark-worker.sh:/spark-worker.sh
@@ -115,21 +115,21 @@ services:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1
       - SPARK_WORKER_MEMORY=1g
-      - SPARK_WORKER_PORT=7080
+      - SPARK_WORKER_PORT=${SPARK_WORKER_3_INTERNAL_PORT:-7080}    # ← DİNAMİK!
       - SPARK_WORKER_WEBUI_PORT=8081
 
   spark-client:
     build:
       context: ./spark-client
       dockerfile: Dockerfile
-    container_name: spark-client
+    container_name: ${ENVIRONMENT:-development}-spark-client
     hostname: spark-client
     depends_on:
       spark-master:
         condition: service_healthy
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.20.20
+      data-platform:
+        ipv4_address: ${SPARK_IP_BASE}.20
     volumes:
       - ../../../2-src:/workspace
       - ../../../models:/models
@@ -152,5 +152,3 @@ services:
         ls -la /workspace
         tail -f /dev/null
       "
-
-# Network

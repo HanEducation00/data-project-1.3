@@ -1,35 +1,34 @@
-# Master Docker Compose - Data Platform 1.3
+# =============================================================================
+# MASTER DOCKER COMPOSE - DATA PLATFORM 1.3
 # Environment-Aware Orchestration - WSL Optimized
-# Usage: ENVIRONMENT=development docker-compose up
+# Usage: docker-compose --env-file .env.development up -d
+# =============================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-data-project-13}
 
 # Include all service compositions
 include:
-  - path: 6-infrastructure/docker/5-postgresql/docker-compose.yaml
-    env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/1-kafka/docker-compose.yaml
-    env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/2-spark/docker-compose.yaml
-    env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/4-mlflow/docker-compose.yaml
-    env_file: .env.${ENVIRONMENT:-development}
-  - path: 6-infrastructure/docker/3-airflow/docker-compose.yaml
-    env_file: .env.${ENVIRONMENT:-development}
+  - 6-infrastructure/docker/5-postgresql/docker-compose.yaml
+  - 6-infrastructure/docker/1-kafka/docker-compose.yaml
+  - 6-infrastructure/docker/2-spark/docker-compose.yaml
+  - 6-infrastructure/docker/4-mlflow/docker-compose.yaml
+  - 6-infrastructure/docker/3-airflow/docker-compose.yaml
 
-# Dynamic network - Environment-aware
+# =============================================================================
+# DYNAMIC NETWORK - ENVIRONMENT AWARE
+# =============================================================================
 networks:
-  data-platform:                           # ← default yerine
+  data-platform:
     name: ${NETWORK_NAME}
     driver: bridge
     ipam:
-      driver: default
       config:
         - subnet: ${NETWORK_SUBNET}
           gateway: ${NETWORK_GATEWAY}
-    labels:
-      environment: "${ENVIRONMENT:-development}"
-      project: "data-platform-1.3"
 
-# WSL-Optimized Volumes
+# =============================================================================
+# WSL-OPTIMIZED VOLUMES
+# =============================================================================
 volumes:
   # Essential bind mounts only
   shared-configs:
@@ -37,14 +36,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./5-config
+      device: ${PWD}/6-infrastructure/docker/5-config    # ← DÜZELTİLDİ!
       
   shared-logs:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./logs
+      device: ${PWD}/logs                                # ← DÜZELTİLDİ!
     
   # Docker managed - Better WSL performance
   shared-workspace:
@@ -57,7 +56,29 @@ volumes:
     driver: local
     
   shared-data-processed:
-
+    driver: local                                        # ← EKSİK OLAN EKLENDİ!
+    
   spark-data:
     driver: local
-  
+
+  # Database volumes - Her environment için ayrı
+  postgres-data:
+    driver: local
+    
+  kafka1-data:
+    driver: local
+    
+  kafka2-data:
+    driver: local
+    
+  kafka3-data:
+    driver: local
+    
+  airflow-postgres-data:
+    driver: local
+    
+  mlflow-postgres-data:
+    driver: local
+    
+  mlflow-minio-data:
+    driver: local

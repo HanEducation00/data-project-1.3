@@ -1,0 +1,145 @@
+# MLflow - Corrected Command Syntax
+
+services:
+  mlflow-postgres:
+    image: postgres:16
+    container_name: mlflow-postgres
+    hostname: mlflow-postgres
+    networks:
+      data-platform:                              # ← DEĞİŞTİ!
+        ipv4_address: 172.30.40.11
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+      POSTGRES_DB: mlflow
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - mlflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "mlflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: mlflow-minio
+    hostname: mlflow-minio
+    networks:
+      data-platform:                              # ← DEĞİŞTİ!
+        ipv4_address: 172.30.40.12
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - mlflow-minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc
+    container_name: mlflow-minio-init
+    hostname: mlflow-minio-init
+    networks:
+      data-platform:                              # ← DEĞİŞTİ!
+        ipv4_address: 172.30.40.15
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    entrypoint: >
+      /bin/sh -c "
+      echo '=== MinIO Initialization Starting ===';
+      
+      echo 'Waiting for MinIO to be fully ready...';
+      sleep 10;
+      
+      echo 'Configuring MinIO client with new syntax...';
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      
+      echo 'Creating mlflow bucket...';
+      /usr/bin/mc mb myminio/mlflow --ignore-existing;
+      
+      echo 'Setting bucket policy to public with new syntax...';
+      /usr/bin/mc anonymous set public myminio/mlflow;
+      
+      echo 'Verifying bucket creation...';
+      /usr/bin/mc ls myminio/ | grep mlflow;
+      
+      echo '✅ MinIO initialization completed successfully!';
+      exit 0;
+      "
+    restart: "no"
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mlflow-server
+    container_name: mlflow-server
+    hostname: mlflow-server
+    networks:
+      data-platform:                              # ← DEĞİŞTİ!
+        ipv4_address: 172.30.40.10
+    depends_on:
+      mlflow-postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_HOST=0.0.0.0
+      - MLFLOW_PORT=5000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - MLFLOW_TRACKING_URI=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
+    volumes:
+      - ../../../models:/models
+      - ../../../logs/mlflow:/logs
+    command:
+      - server
+      - --backend-store-uri=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
+      - --artifacts-destination=s3://mlflow/
+      - --serve-artifacts
+      - --host=0.0.0.0
+      - --port=5000
+      - --gunicorn-opts=--timeout 600 --workers 2 --worker-class sync --max-requests 1000
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 8
+      start_period: 90s
+    restart: unless-stopped
+
+# Volumes
+volumes:
+  mlflow-postgres-data:
+    driver: local
+  mlflow-minio-data:
+    driver: local
+
+# Network

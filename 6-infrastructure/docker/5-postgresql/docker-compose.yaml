@@ -1,13 +1,14 @@
-# PostgreSQL - WSL Compatible Configuration
+# PostgreSQL - Dynamic Port Configuration
 # Usage: docker-compose up -d
 
 services:
   postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: ${ENVIRONMENT:-development}-postgres
     hostname: postgres
     networks:
-      - data-platform                              # ← Simplified!
+      data-platform:                                    # ← IP Eklendi!
+        ipv4_address: ${POSTGRES_IP_BASE}.10
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-datauser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datapass}
@@ -16,15 +17,17 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
       POSTGRES_HOST_AUTH_METHOD: md5
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"                   # ← DİNAMİK!
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ../../../logs/postgres:/postgres-logs
     command: >
       bash -c "
-      echo '=== Starting PostgreSQL for Development ===';
+      echo '=== Starting PostgreSQL for ${ENVIRONMENT:-Development} ===';  # ← DİNAMİK!
       echo 'Database: ${POSTGRES_DB:-datawarehouse}';
       echo 'User: ${POSTGRES_USER:-datauser}';
+      echo 'Port: ${POSTGRES_PORT:-5432}';              # ← DİNAMİK!
+      echo 'Environment: ${ENVIRONMENT:-development}';  # ← DİNAMİK!
       echo 'Log directory: /postgres-logs';
       
       mkdir -p /postgres-logs;
@@ -44,4 +47,4 @@ volumes:
   postgres-data:
     driver: local
 
-# External network - Master'dan geliyor
+

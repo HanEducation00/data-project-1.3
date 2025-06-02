@@ -1,13 +1,14 @@
-# MLflow - Corrected Command Syntax
-
+# MLflow - Dynamic Port Configuration
 services:
   mlflow-postgres:
     image: postgres:16
-    container_name: mlflow-postgres
+    container_name: ${ENVIRONMENT:-development}-mlflow-postgres
     hostname: mlflow-postgres
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.40.11
+      data-platform:
+        ipv4_address: ${MLFLOW_IP_BASE}.11
+    ports:
+      - "${MLFLOW_POSTGRES_PORT:-5434}:5432"           # ← DİNAMİK!
     environment:
       POSTGRES_USER: mlflow
       POSTGRES_PASSWORD: mlflow
@@ -24,19 +25,19 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: mlflow-minio
+    container_name: ${ENVIRONMENT:-development}-mlflow-minio
     hostname: mlflow-minio
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.40.12
+      data-platform:
+        ipv4_address: ${MLFLOW_IP_BASE}.12
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - mlflow-minio-data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT:-9000}:9000"                 # ← DİNAMİK!
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"             # ← DİNAMİK!
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -47,11 +48,11 @@ services:
 
   minio-init:
     image: minio/mc
-    container_name: mlflow-minio-init
+    container_name: ${ENVIRONMENT:-development}-mlflow-minio-init
     hostname: mlflow-minio-init
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.40.15
+      data-platform:
+        ipv4_address: ${MLFLOW_IP_BASE}.15
     depends_on:
       minio:
         condition: service_healthy
@@ -60,24 +61,24 @@ services:
       - MINIO_ROOT_PASSWORD=minioadmin
     entrypoint: >
       /bin/sh -c "
-      echo '=== MinIO Initialization Starting ===';
+      echo '=== MinIO Initialization Starting (${ENVIRONMENT:-development}) ===';
       
       echo 'Waiting for MinIO to be fully ready...';
       sleep 10;
       
-      echo 'Configuring MinIO client with new syntax...';
+      echo 'Configuring MinIO client...';
       /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
       
       echo 'Creating mlflow bucket...';
       /usr/bin/mc mb myminio/mlflow --ignore-existing;
       
-      echo 'Setting bucket policy to public with new syntax...';
+      echo 'Setting bucket policy to public...';
       /usr/bin/mc anonymous set public myminio/mlflow;
       
       echo 'Verifying bucket creation...';
       /usr/bin/mc ls myminio/ | grep mlflow;
       
-      echo '✅ MinIO initialization completed successfully!';
+      echo '✅ MinIO initialization completed for ${ENVIRONMENT:-development}!';
       exit 0;
       "
     restart: "no"
@@ -87,11 +88,11 @@ services:
       context: .
       dockerfile: Dockerfile
     image: mlflow-server
-    container_name: mlflow-server
+    container_name: ${ENVIRONMENT:-development}-mlflow-server
     hostname: mlflow-server
     networks:
-      data-platform:                              # ← DEĞİŞTİ!
-        ipv4_address: 172.30.40.10
+      data-platform:
+        ipv4_address: ${MLFLOW_IP_BASE}.10
     depends_on:
       mlflow-postgres:
         condition: service_healthy
@@ -100,14 +101,15 @@ services:
       minio-init:
         condition: service_completed_successfully
     ports:
-      - "5000:5000"
+      - "${MLFLOW_SERVER_PORT:-5000}:${MLFLOW_SERVER_PORT:-5000}"  # ← DİNAMİK!
     environment:
       - MLFLOW_HOST=0.0.0.0
-      - MLFLOW_PORT=5000
+      - MLFLOW_PORT=${MLFLOW_SERVER_PORT:-5000}                    # ← DİNAMİK!
       - AWS_ACCESS_KEY_ID=minioadmin
       - AWS_SECRET_ACCESS_KEY=minioadmin
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
       - MLFLOW_TRACKING_URI=postgresql://mlflow:mlflow@mlflow-postgres:5432/mlflow
+      - ENVIRONMENT=${ENVIRONMENT:-development}                    # ← DİNAMİK!
     volumes:
       - ../../../models:/models
       - ../../../logs/mlflow:/logs
@@ -117,7 +119,7 @@ services:
       - --artifacts-destination=s3://mlflow/
       - --serve-artifacts
       - --host=0.0.0.0
-      - --port=5000
+      - --port=${MLFLOW_SERVER_PORT:-5000}                         # ← DİNAMİK!
       - --gunicorn-opts=--timeout 600 --workers 2 --worker-class sync --max-requests 1000
     deploy:
       resources:
@@ -128,7 +130,7 @@ services:
           memory: 1G
           cpus: '0.5'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${MLFLOW_SERVER_PORT:-5000}/health"]
       interval: 30s
       timeout: 20s
       retries: 8
@@ -141,5 +143,3 @@ volumes:
     driver: local
   mlflow-minio-data:
     driver: local
-
-# Network

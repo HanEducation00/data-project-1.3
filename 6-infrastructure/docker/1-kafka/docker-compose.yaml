@@ -1,21 +1,21 @@
-# Kafka Cluster - Simplified for Testing
+# Kafka Cluster - Dynamic Environment Configuration
 services:
   kafka1:
     image: kafka:3.6.1
     build:
       context: .
-    container_name: kafka1
-    hostname: kafka1
+    container_name: ${ENVIRONMENT:-development}-kafka1
+    hostname: ${ENVIRONMENT:-development}-kafka1  # ← ENVIRONMENT-SPECIFIC HOSTNAME
     ports:
-      - "9191:9092"
-      - "9193:9093"
-      - "19092:19092"
+      - "${KAFKA1_PORT:-9191}:9092"           
+      - "${KAFKA1_JMX_PORT:-9193}:9093"       
+      - "${KAFKA1_EXTERNAL_PORT:-19092}:19092" 
     networks:
-      data-platform:                              # ← DÜZELTİLDİ!
-        ipv4_address: 172.30.10.11
+      data-platform:
+        ipv4_address: ${KAFKA_IP_BASE}.11
     volumes:
       - ./config/kafka1/server.properties:/kafka/config/server.properties
-      - ./data/kafka1/:/data/kafka/
+      - ./data/${ENVIRONMENT:-development}/kafka1/:/data/kafka/  # ← ENVIRONMENT-SPECIFIC DATA PATH
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -23,7 +23,7 @@ services:
     command: >
       bash -c "
         if [ ! -f /data/kafka/meta.properties ]; then
-          echo 'Formatting storage directory for Kafka 1'
+          echo 'Formatting storage directory for Kafka 1 (${ENVIRONMENT:-development})'
           /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
         fi
         /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
@@ -39,18 +39,18 @@ services:
     image: kafka:3.6.1
     build:
       context: .
-    container_name: kafka2
-    hostname: kafka2
+    container_name: ${ENVIRONMENT:-development}-kafka2
+    hostname: ${ENVIRONMENT:-development}-kafka2  # ← ENVIRONMENT-SPECIFIC HOSTNAME
     ports:
-      - "9292:9092"
-      - "9293:9093"
-      - "29092:29092"
+      - "${KAFKA2_PORT:-9292}:9092"           
+      - "${KAFKA2_JMX_PORT:-9293}:9093"       
+      - "${KAFKA2_EXTERNAL_PORT:-29092}:29092" 
     networks:
-      data-platform:                              # ← DÜZELTİLDİ!
-        ipv4_address: 172.30.10.12
+      data-platform:
+        ipv4_address: ${KAFKA_IP_BASE}.12
     volumes:
       - ./config/kafka2/server.properties:/kafka/config/server.properties
-      - ./data/kafka2/:/data/kafka/
+      - ./data/${ENVIRONMENT:-development}/kafka2/:/data/kafka/  # ← ENVIRONMENT-SPECIFIC DATA PATH
     environment:
       KAFKA_NODE_ID: 2
       KAFKA_PROCESS_ROLES: broker,controller
@@ -58,7 +58,7 @@ services:
     command: >
       bash -c "
         if [ ! -f /data/kafka/meta.properties ]; then
-          echo 'Formatting storage directory for Kafka 2'
+          echo 'Formatting storage directory for Kafka 2 (${ENVIRONMENT:-development})'
           /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
         fi
         /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
@@ -70,18 +70,18 @@ services:
     image: kafka:3.6.1
     build:
       context: .
-    container_name: kafka3
-    hostname: kafka3
+    container_name: ${ENVIRONMENT:-development}-kafka3
+    hostname: ${ENVIRONMENT:-development}-kafka3  # ← ENVIRONMENT-SPECIFIC HOSTNAME
     ports:
-      - "9392:9092"
-      - "9393:9093"
-      - "39092:39092"
+      - "${KAFKA3_PORT:-9392}:9092"           
+      - "${KAFKA3_JMX_PORT:-9393}:9093"       
+      - "${KAFKA3_EXTERNAL_PORT:-39092}:39092" 
     networks:
-      data-platform:                              # ← DÜZELTİLDİ!
-        ipv4_address: 172.30.10.13
+      data-platform:
+        ipv4_address: ${KAFKA_IP_BASE}.13
     volumes:
       - ./config/kafka3/server.properties:/kafka/config/server.properties
-      - ./data/kafka3/:/data/kafka/
+      - ./data/${ENVIRONMENT:-development}/kafka3/:/data/kafka/  # ← ENVIRONMENT-SPECIFIC DATA PATH
     environment:
       KAFKA_NODE_ID: 3
       KAFKA_PROCESS_ROLES: broker,controller
@@ -89,7 +89,7 @@ services:
     command: >
       bash -c "
         if [ ! -f /data/kafka/meta.properties ]; then
-          echo 'Formatting storage directory for Kafka 3'
+          echo 'Formatting storage directory for Kafka 3 (${ENVIRONMENT:-development})'
           /kafka/bin/kafka-storage.sh format -t $$CLUSTER_ID -c /kafka/config/server.properties
         fi
         /kafka/bin/kafka-server-start.sh /kafka/config/server.properties
@@ -97,4 +97,3 @@ services:
     depends_on:
       - kafka1
       - kafka2
-
