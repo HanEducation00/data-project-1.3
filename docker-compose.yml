@@ -36,14 +36,14 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${PWD}/6-infrastructure/docker/5-config    # ← DÜZELTİLDİ!
+      device: ${PWD}/6-infrastructure/docker/5-config    
       
   shared-logs:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${PWD}/logs                                # ← DÜZELTİLDİ!
+      device: ${PWD}/logs                                
     
   # Docker managed - Better WSL performance
   shared-workspace:
@@ -56,7 +56,7 @@ volumes:
     driver: local
     
   shared-data-processed:
-    driver: local                                        # ← EKSİK OLAN EKLENDİ!
+    driver: local                                       
     
   spark-data:
     driver: local
