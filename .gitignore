@@ -81,4 +81,18 @@ temp/
 # Compiled files
 *.class
 *.jar
-*.war
+*.war6-infrastructure/docker/1-kafka/data/
+
+
+# Docker volumes and data
+*/data/
+kafka*/
+postgres-data/
+minio-data/
+mlflow-artifacts/
+airflow-logs/
+
+# Kafka specific
+1-kafka/data/
+2-kafka/data/
+3-kafka/data/

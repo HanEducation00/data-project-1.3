@@ -100,6 +100,7 @@ python -m streaming.app
 #### spark client
 pip install pyspark==3.4.0
 apt-get update && apt-get install -y libgomp1
+pip install mlflow==2.8.1
 
 
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
@@ -117,3 +118,10 @@ docker-compose --env-file .env.staging up -d
 
 # Production
 docker-compose --env-file .env.production up -d
+
+# Kontrol
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep kafka
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep spark
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep airflow
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep mlflow
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep postgres 
