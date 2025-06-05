@@ -27,12 +27,12 @@ nc -zv localhost 9292  # kafka2
 nc -zv localhost 9392  # kafka3
 
 # Topic listesini göster:
-docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+docker exec development-kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
 # Topic listesini sil:
-docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic sensor-data
+docker exec development-kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic sensor-data
 
 # Yeni topic oluştur (test için):
-docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic sensor-data --partitions 3 --replication-factor 3
+docker exec development-kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic sensor-data --partitions 3 --replication-factor 3
 
 # Topic'i doğrula:
 docker exec kafka1 /kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic zurna-test
@@ -125,3 +125,30 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep spark
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep airflow
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep mlflow
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep postgres 
+
+
+
+-- En son saatlerdeki 5 veri
+SELECT 
+    customer_id,
+    full_timestamp,
+    hour,
+    minute,
+    load_percentage
+FROM kafka_raw_data 
+WHERE full_timestamp = (SELECT MAX(full_timestamp) FROM kafka_raw_data)
+ORDER BY hour DESC, minute DESC, customer_id
+LIMIT 5;
+
+
+
+-- Hangi günlerde veri var ve en sonuncusu hangisi?
+SELECT 
+    DATE(full_timestamp) as data_date,
+    COUNT(*) as record_count,
+    MAX(hour) as last_hour,
+    MAX(minute) as last_minute
+FROM kafka_raw_data 
+GROUP BY DATE(full_timestamp)
+ORDER BY data_date DESC
+LIMIT 10;

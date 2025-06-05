@@ -12,15 +12,11 @@ x-airflow-common: &airflow-common
     - AIRFLOW__WEBSERVER__RBAC=True
     - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
     
-    # Dynamic Connection Strings! ← DİNAMİK!
+    # Connection Strings
     - AIRFLOW_CONN_KAFKA_DEFAULT=kafka://kafka1:9092,kafka2:9092,kafka3:9092
     - AIRFLOW_CONN_POSTGRES_DEFAULT=postgres://datauser:datapass@postgres:5432/datawarehouse
     - AIRFLOW_CONN_SPARK_DEFAULT=spark://spark-master:7077
     - AIRFLOW_CONN_MLFLOW_DEFAULT=http://mlflow-server:5000
-    
-    # Environment Specific Settings
-    - AIRFLOW__WEBSERVER__INSTANCE_NAME=${ENVIRONMENT:-Development}
-    - AIRFLOW__WEBSERVER__NAVBAR_COLOR=${AIRFLOW_NAVBAR_COLOR:-#007A87}
     
     # Standard Settings
     - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
@@ -32,12 +28,19 @@ x-airflow-common: &airflow-common
     - AIRFLOW__WEBSERVER__DEFAULT_DAG_RUN_DISPLAY_NUMBER=25
     - AIRFLOW__WEBSERVER__HIDE_PAUSED_DAGS_BY_DEFAULT=False
     - AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE=UTC
+    
+    # ✅ STATIC VALUES (Expansion yok!)
+    - AIRFLOW__WEBSERVER__INSTANCE_NAME=Development
+    - AIRFLOW__WEBSERVER__NAVBAR_COLOR=#007A87
     - AIRFLOW__ASTRONOMER__ANALYTICS_ENABLED=False
     - ASTRONOMER__ANALYTICS__ENABLED=False
+    
+    # ✅ DAG Discovery Settings (Sıralama önemli!)
     - AIRFLOW__CORE__STORE_DAG_CODE=True
     - AIRFLOW__WEBSERVER__SHOW_RECENT_STATS_FOR_COMPLETED_RUNS=True
     - AIRFLOW__WEBSERVER__RELOAD_ON_PLUGIN_CHANGE=True
     - AIRFLOW__CORE__DAG_DISCOVERY_SAFE_MODE=False
+  
   volumes:
     - ../../../3-workflows:/usr/local/airflow/dags
     - ../../../logs/airflow:/usr/local/airflow/logs
@@ -46,6 +49,7 @@ x-airflow-common: &airflow-common
     - ../../../2-src:/workspace
     - ../../../models:/models
   restart: unless-stopped
+
 
 services:
   airflow-postgres:
@@ -103,16 +107,23 @@ services:
         airflow roles create User || echo "User role already exists"
         airflow roles create Op || echo "Op role already exists"
         
-        echo "Creating admin user..."
+        # ✅ FIX: İlk sync-perm (roles'dan sonra)
+        echo "Synchronizing FAB permissions (initial)..."
+        airflow sync-perm
+        
+        # ✅ FIX: Admin user'ı her seferinde yeniden oluştur
+        echo "Recreating admin user with proper permissions..."
+        airflow users delete --username admin 2>/dev/null || echo "Admin user didn't exist"
         airflow users create \
           --username admin \
           --password admin \
           --firstname Admin \
           --lastname User \
           --role Admin \
-          --email admin@${ENVIRONMENT:-dev}.local || echo "Admin user already exists"
+          --email admin@${ENVIRONMENT:-dev}.local
         
-        echo "Synchronizing FAB permissions..."
+        # ✅ FIX: Final sync-perm (user'dan sonra)  
+        echo "Synchronizing FAB permissions (final)..."
         airflow sync-perm
         
         echo "=== Airflow Init completed ==="

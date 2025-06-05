@@ -48,7 +48,7 @@ json_schema = StructType([
     StructField("records", ArrayType(record_schema), True)
 ])
 
-jdbc_url = "jdbc:postgresql://postgres:5432/datawarehouse"
+jdbc_url = "jdbc:postgresql://development-postgres:5432/datawarehouse"
 connection_properties = {
     "user": "datauser",
     "password": "datapass",
@@ -59,9 +59,10 @@ try:
     # Kafka stream
     kafka_df = spark.readStream \
         .format("kafka") \
-        .option("kafka.bootstrap.servers", "kafka1:9092") \
+        .option("kafka.bootstrap.servers", "development-kafka1:9092") \
         .option("subscribe", "sensor-data") \
-        .option("startingOffsets", "earliest") \
+        .option("startingOffsets", "latest") \
+        .option("maxOffsetsPerTrigger", 10000) \
         .load()
     
     print("Successfully connected to Kafka!")
@@ -118,7 +119,7 @@ try:
     query = final_df.writeStream \
         .foreachBatch(write_to_postgres) \
         .outputMode("append") \
-        .trigger(processingTime="10 seconds") \
+        .trigger(processingTime="5 seconds") \
         .start()
     
     print("🚀 Optimized streaming started!")
