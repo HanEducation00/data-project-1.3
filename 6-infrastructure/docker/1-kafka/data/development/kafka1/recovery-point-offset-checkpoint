@@ -7,7 +7,7 @@ __consumer_offsets 42 0
 __consumer_offsets 21 0
 __consumer_offsets 17 0
 __consumer_offsets 30 0
-sensor-data 2 0
+sensor-data 2 19134
 __consumer_offsets 26 3
 __consumer_offsets 5 0
 __consumer_offsets 38 0
@@ -35,7 +35,7 @@ __consumer_offsets 44 3
 __consumer_offsets 23 0
 __consumer_offsets 19 0
 __consumer_offsets 32 0
-sensor-data 0 0
+sensor-data 0 19311
 __consumer_offsets 28 0
 __consumer_offsets 7 0
 __consumer_offsets 40 0
@@ -49,7 +49,7 @@ __consumer_offsets 22 0
 __consumer_offsets 18 0
 __consumer_offsets 31 0
 __consumer_offsets 27 0
-sensor-data 1 0
+sensor-data 1 19202
 __consumer_offsets 39 0
 __consumer_offsets 6 0
 __consumer_offsets 35 0
