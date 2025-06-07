@@ -11,11 +11,15 @@ from pyspark.ml.regression import RandomForestRegressor
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import RegressionEvaluator
-
 from common.data_extractor import create_spark_session, extract_daily_aggregated_data, filter_seasonal_data
 from common.feature_engineer import prepare_training_data
 from common.mlflow_manager import register_model
 from common.config import logger, FEATURE_COLUMNS, TARGET_COLUMN, SEASON_MODELS
+
+# 🎯 TRACKING URI EKLEME - SPRING VE SUMMER GİBİ!
+import mlflow
+import mlflow.spark
+mlflow.set_tracking_uri("http://mlflow-server:5000")
 
 def train_autumn_model(target_year=2016):
     """Sonbahar sezonu modeli eğit (Ekim-Aralık)"""
@@ -30,8 +34,8 @@ def train_autumn_model(target_year=2016):
         end_date = f"{target_year}-12-31"
         
         daily_df = extract_daily_aggregated_data(
-            spark, 
-            start_date=start_date, 
+            spark,
+            start_date=start_date,
             end_date=end_date,
             season="autumn"
         )
@@ -99,23 +103,39 @@ def train_autumn_model(target_year=2016):
         logger.info(f"  MAE: {mae:.4f}")
         logger.info(f"  R²: {r2:.4f}")
         
-        # MLflow'a kaydet
-        model_name = SEASON_MODELS["autumn"]
-        success = register_model(model, model_name, "autumn", metrics)
+        # ✅ SPRING VE SUMMER GİBİ EXPERIMENT OLUŞTUR/SEÇ + DIRECT MLFLOW
+        mlflow.set_experiment("seasonal-energy-models")
+        mlflow.start_run(run_name=f"autumn_energy_model_{target_year}")
+        mlflow.log_metrics({
+            "rmse": float(rmse),
+            "mae": float(mae),
+            "r2": float(r2),
+            "training_records": int(train_df.count()),
+            "test_records": int(test_df.count())
+        })
+        mlflow.log_params({
+            "num_trees": 100,
+            "max_depth": 10,
+            "target_year": target_year,
+            "season": "autumn",
+            "spark_mode": "pipeline",
+            "data_period": f"{start_date} to {end_date}"
+        })
+        mlflow.spark.log_model(model, "model")
+        mlflow.end_run()
         
-        if success:
-            logger.info(f"✅ {model_name} başarıyla kaydedildi!")
-            
-            # Feature importance göster
-            rf_model = model.stages[-1]
-            feature_importance = rf_model.featureImportances.toArray()
-            
-            logger.info("🎯 En önemli özellikler:")
-            for i, importance in enumerate(feature_importance[:5]):
-                if i < len(FEATURE_COLUMNS):
-                    logger.info(f"  {FEATURE_COLUMNS[i]}: {importance:.4f}")
-            
-        return success
+        logger.info("✅ Model MLflow'a kaydedildi!")
+        
+        # Feature importance göster
+        rf_model = model.stages[-1]
+        feature_importance = rf_model.featureImportances.toArray()
+        
+        logger.info("🎯 En önemli özellikler:")
+        for i, importance in enumerate(feature_importance[:5]):
+            if i < len(FEATURE_COLUMNS):
+                logger.info(f"  {FEATURE_COLUMNS[i]}: {importance:.4f}")
+        
+        return True
         
     except Exception as e:
         logger.error(f"❌ Sonbahar model eğitiminde hata: {e}")

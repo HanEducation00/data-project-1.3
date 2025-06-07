@@ -20,6 +20,8 @@ from datetime import datetime
 import mlflow
 import mlflow.spark
 
+mlflow.set_tracking_uri("http://mlflow-server:5000")
+
 # ✅ BRONZ LAYER GİBİ LOCAL MODE - TÜM CORE'LARI KULLAN
 spark = SparkSession.builder \
     .appName("Summer Season Model Training") \
@@ -202,7 +204,8 @@ def train_model(feature_df, target_col, model_name="summer_energy_model", target
         print("🔮 Örnek tahminler:")
         predictions.select("date", target_col, "prediction").show(10)
         
-        # ✅ SPRİNG GİBİ SADECE BASIT MLflow - REGISTERED MODEL YOK!
+        # ✅ YENİ EXPERIMENT OLUŞTUR/SEÇ
+        mlflow.set_experiment("seasonal-energy-models")
         mlflow.start_run(run_name=f"{model_name}_{target_year}")
         mlflow.log_metrics({
             "rmse": float(rmse),

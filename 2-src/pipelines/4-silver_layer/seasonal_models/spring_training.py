@@ -15,8 +15,12 @@ from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.sql.functions import max as spark_max, col, avg, min as spark_min, count
 from datetime import datetime
+
 import mlflow
 import mlflow.spark
+
+# 🎯 TRACKING URI EKLEME - SUMMER GİBİ!
+mlflow.set_tracking_uri("http://mlflow-server:5000")
 
 # ✅ BRONZ LAYER GİBİ LOCAL MODE - TÜM CORE'LARI KULLAN
 spark = SparkSession.builder \
@@ -200,11 +204,12 @@ def train_model(feature_df, target_col, model_name="spring_energy_model", target
         print("🔮 Örnek tahminler:")
         predictions.select("date", target_col, "prediction").show(10)
         
-        # ✅ MLflow'a kaydet - SADECE BU KADAR!
+        # ✅ SUMMER GİBİ EXPERIMENT OLUŞTUR/SEÇ
+        mlflow.set_experiment("seasonal-energy-models")
         mlflow.start_run(run_name=f"{model_name}_{target_year}")
         mlflow.log_metrics({
             "rmse": float(rmse),
-            "mae": float(mae), 
+            "mae": float(mae),
             "r2": float(r2),
             "training_records": int(train_df.count()),
             "test_records": int(test_df.count())
